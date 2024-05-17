@@ -19,7 +19,7 @@ function BannerSection({ packages }: { packages: IPackage }) {
             </span>{" "}
           </h1>
           <p className="mt-8 text-gray-700">
-            Hello1 Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
             repellat perspiciatis aspernatur quis voluptatum porro incidunt,
             libero sequi quos eos velit
           </p>
