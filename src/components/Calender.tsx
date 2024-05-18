@@ -103,6 +103,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
         child_guest: childCount,
         infant_guest: infantCount,
         package_id: packages.id,
+        sub_package_id: getSubPackages?.id,
         start_point: start,
         end_point: end,
         date: new Date(selectedDate).toISOString().split("T")[0],
@@ -167,7 +168,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
 
           {/* Calender Container */}
           <div className="space-y-3 text-left">
-            <h3 className="px-2 font-bold text-gray-700">Select Date<span className="text-red-500">*</span></h3>
+            <h3 className="px-2 font-bold text-gray-700">Select Date</h3>
             <Calendar
               onChange={handleDateChange as any}
               value={selectedDate}
