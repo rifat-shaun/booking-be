@@ -15,13 +15,13 @@ const Admin = () => {
   // TODO: Uncomment the following before pushing the code if the code is commented.
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (!token) {
-      push("/login");
-    } else if (data) {
-      if (data?.data?.role !== "super_admin") {
-        push("/login");
-      }
-    }
+    // if (!token) {
+    //   push("/login");
+    // } else if (data) {
+    //   if (data?.data?.role !== "super_admin") {
+    //     push("/login");
+    //   }
+    // }
   }, [error, data, push]);
 
   if (isLoading) {

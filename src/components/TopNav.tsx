@@ -1,9 +1,8 @@
 import Link from "next/link";
-import React from "react";
-import { FaWhatsapp, FaXTwitter } from "react-icons/fa6";
+import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa6";
 import { LuPhoneCall } from "react-icons/lu";
 import { MdOutlineEmail } from "react-icons/md";
-import { FaFacebook, FaInstagram } from "react-icons/fa";
 
 const TopNav = () => {
   return (
@@ -20,7 +19,7 @@ const TopNav = () => {
             </Link>
             <Link
               className="flex items-center text-sm hover:text-gray-500 ml-3 text-white"
-              href="wa.me/+15878973374"
+              href="https://wa.me/+15878973374"
             >
               <FaWhatsapp className="mr-1 text-lg" />
               <span>WhatsApp: (+1) 587 897 3374</span>
@@ -37,7 +36,10 @@ const TopNav = () => {
                   <MdOutlineEmail className="mr-1 text-lg" />
                   <span>Email: info@shuttletomoraine.com</span>
                 </Link>
-                <Link href="#" className=" hover:text-gray-500 text-white">
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61559369790810"
+                  className=" hover:text-gray-500 text-white"
+                >
                   <span className="sr-only">Facebook</span>
                   <FaFacebook />
                 </Link>
@@ -45,10 +47,10 @@ const TopNav = () => {
                   <span className="sr-only">Instagram</span>
                   <FaInstagram />
                 </Link>
-                <Link href="#" className=" hover:text-gray-500 text-white">
+                {/* <Link href="#" className=" hover:text-gray-500 text-white">
                   <span className="sr-only">Twitter</span>
                   <FaXTwitter />
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>

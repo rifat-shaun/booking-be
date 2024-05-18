@@ -1,12 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCollapse } from "react-collapsed";
+import { FaChevronDown } from "react-icons/fa6";
+import { MdKeyboardArrowDown } from "react-icons/md";
 import InputField from "./InputField";
 import LabelField from "./LabelField";
-import { FaChevronDown } from "react-icons/fa6";
-import { MdClear } from "react-icons/md";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 
 function InnerCollapsible({
   setValue,
@@ -17,6 +15,7 @@ function InnerCollapsible({
 }: any) {
   const { getCollapseProps, getToggleProps, isExpanded, setExpanded } =
     useCollapse();
+  const [inputValue, setInputValue] = useState("");
 
   return (
     <div className="divide-y-[1px]">
@@ -48,12 +47,24 @@ function InnerCollapsible({
                     {items?.name}
                   </p>
                 ))}
-                <div className="flex flex-col md:items-center my-2 gap-1 md:gap-2 md:flex-row">
-                  <Input type="text" className="h-6" placeholder="Others" />
-                  <Button className="bg-cyan-400 text-white h-6 w-fit">
+                {/* <div className="flex flex-col md:items-center my-2 gap-1 md:gap-2 md:flex-row">
+                  <Input
+                    type="text"
+                    className="h-6"
+                    placeholder="Others"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                  />
+                  <Button
+                    className="bg-cyan-400 text-white h-6 w-fit"
+                    onClick={() => {
+                      setValue(inputValue);
+                      setIsExpanded(false);
+                    }}
+                  >
                     Submit
                   </Button>
-                </div>
+                </div> */}
 
                 {/* <p
                   className="cursor-pointer"
@@ -95,8 +106,6 @@ const FromCollapsible = ({
   start,
   setLocationId,
   locationId,
-  formErrors,
-  setFormErrors,
 }: {
   label: string;
   locations: any;
@@ -107,15 +116,9 @@ const FromCollapsible = ({
     start_point_id: string;
     end_point_id: string;
   };
-  formErrors: any;
-  setFormErrors: (value: any) => any;
 }) => {
   const { getCollapseProps, getToggleProps, isExpanded, setExpanded } =
     useCollapse();
-
-  useEffect(() => {
-    setFormErrors?.({ ...formErrors, start: "" });
-  }, [start]);
   return (
     <div className="text-left">
       <div className="px-2">
@@ -123,17 +126,13 @@ const FromCollapsible = ({
       </div>
       <div className="relative">
         <div {...getToggleProps()}>
-          <InputField
-            type="text"
-            value={start}
-            error={!!formErrors?.start ? formErrors?.start : null}
-          />
+          <InputField type="text" value={start} />
         </div>
         <button
           className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2  right-0 text-lg"
           onClick={() => (setExpanded(false) as any) & (setStart("") as any)}
         >
-          <MdClear />
+          <MdKeyboardArrowDown />
         </button>
       </div>
       {isExpanded && (

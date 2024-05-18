@@ -1,26 +1,16 @@
 "use client";
-import React, { useState } from "react";
-import LabelField from "./LabelField";
+import { useState } from "react";
 import InputField from "./InputField";
+import LabelField from "./LabelField";
 
 const UserInfoForm = ({
   userInfo,
   setUserInfo,
-  formErrors,
-  setFormErrors
 }: {
   userInfo: any;
   setUserInfo: any;
-  formErrors: any;
-  setFormErrors: (value: any) => void;
 }) => {
   const [isAccount, setIsAccount] = useState(false);
-  const handleInputValueChange = (key: string, value: any) => {
-    setUserInfo({ ...userInfo, [key]: value })
-    setFormErrors({ ...formErrors, [key]: ''})
-  }
-
-  console.log("Here you go ===>", formErrors?.name,  !!formErrors?.name);
   return (
     <div className="mb-10">
       <h3 className="text-left text-2xl text-gray-700 border-b-2 px-2 py-3">
@@ -36,9 +26,8 @@ const UserInfoForm = ({
               placeholder="Enter your name"
               required
               onChange={(e: any) =>
-                handleInputValueChange('name', e.target.value)
+                setUserInfo({ ...userInfo, name: e.target.value })
               }
-              error={!!formErrors?.name ? formErrors?.name : null}
             />
           </div>
           <div className="col-12 md:col-6 mb-4">
@@ -48,9 +37,8 @@ const UserInfoForm = ({
               placeholder="Enter your email"
               required
               onChange={(e: any) =>
-                handleInputValueChange('email', e.target.value)
+                setUserInfo({ ...userInfo, email: e.target.value })
               }
-              error={!!formErrors?.email ? formErrors?.email : null}
             />
           </div>
         </div>
@@ -62,9 +50,8 @@ const UserInfoForm = ({
               placeholder="Enter your Phone"
               required
               onChange={(e: any) =>
-                handleInputValueChange('phone', e.target.value)
+                setUserInfo({ ...userInfo, phone: e.target.value })
               }
-              error={!!formErrors?.phone ? formErrors?.phone : null}
             />
           </div>
           <div className="col-12 md:col-6 mb-4">
@@ -76,26 +63,11 @@ const UserInfoForm = ({
               type="text"
               placeholder="Address"
               onChange={(e: any) =>
-                handleInputValueChange('address', e.target.value)
+                setUserInfo({ ...userInfo, address: e.target.value })
               }
             />
           </div>
         </div>
-        {isAccount && (
-          <div className="row mt-4">
-            <div className="col-12 md:col-6 mb-4">
-              <LabelField>Password</LabelField>
-              <InputField
-                type="password"
-                placeholder="Password"
-                required
-                onChange={(e: any) =>
-                handleInputValueChange('password', e.target.value)
-                }
-              />
-            </div>
-          </div>
-        )}
         <div className="flex items-center mt-4  space-x-2">
           <input
             type="checkbox"
@@ -109,6 +81,21 @@ const UserInfoForm = ({
             Create account?
           </label>
         </div>
+        {isAccount && (
+          <div className="row mt-4">
+            <div className="col-12 md:col-6 mb-4">
+              <LabelField>Password</LabelField>
+              <InputField
+                type="password"
+                placeholder="Password"
+                required
+                onChange={(e: any) =>
+                  setUserInfo({ ...userInfo, password: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

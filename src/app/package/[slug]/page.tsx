@@ -2,10 +2,10 @@ import BannerSection from "@/components/BannerSection";
 import Calendars from "@/components/Calender";
 import PackageDescription from "@/components/PackageDescription";
 import TourOptions from "@/components/TourOptions";
+import { getListPage } from "@/lib/contentParser";
 import { IPackage } from "@/type";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getListPage, getSinglePage } from "@/lib/contentParser";
+import { Suspense } from "react";
 
 export async function generateStaticParams() {
   const posts = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/package`).then(
@@ -41,12 +41,17 @@ export default async function Single({ params }: { params: any }) {
   const filterData = regularData.frontmatter.packages.find(
     (item: any) => item.title.toLowerCase() === data?.data?.name.toLowerCase()
   );
+  console.log(filterData);
   return (
     <Suspense fallback={<div>Loading...</div>}>
       {/* <Hero /> */}
-      <BannerSection packages={data.data} />
+      <BannerSection packages={data.data} packageData={filterData} />
 
-      <PackageDescription packageName={data.data.name} packageData={filterData}>
+      <PackageDescription
+        packageName={data.data.name}
+        packageData={filterData}
+        regularData={regularData}
+      >
         <Calendars packages={data.data} />
       </PackageDescription>
 

@@ -7,7 +7,7 @@ const bookingSliceTag = api.enhanceEndpoints({
 const bookingApiSlice = bookingSliceTag.injectEndpoints({
   endpoints: (builder: any) => ({
     getBooking: builder.query({
-      query: (arg: {order_number: string}) => `booking?order_number=${arg.order_number}`,
+      query: () => `booking`,
       providesTags: ["Booking"],
     }),
     addBooking: builder.mutation({

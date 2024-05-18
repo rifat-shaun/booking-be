@@ -1,43 +1,35 @@
 "use client";
 
+import ToCollapsible from "@/components/ToCollapsed";
+import { useAddBookingMutation } from "@/redux/features/booking/bookingApiSlice";
+import { useGetGuestQuery } from "@/redux/features/guest/guestApiSlice";
 import {
   useGetEndLocationQuery,
   useGetStartLocationQuery,
 } from "@/redux/features/location/locationApiSlice";
-import { IPackage } from "@/type";
-import { useEffect, useState } from "react";
-import ToCollapsible from "@/components/ToCollapsed";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import FromCollapsible from "./FromCollapsed";
-import { Button } from "./ui/button";
-import { FaMinus, FaPlus, FaUser } from "react-icons/fa6";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
 import {
   useGetSingleAdultPriceQuery,
   useGetSingleChildPriceQuery,
 } from "@/redux/features/price/priceApiSlice";
-import { useGetGuestQuery } from "@/redux/features/guest/guestApiSlice";
-import { useGetUserDetailsQuery } from "@/redux/authApiSlice";
+import { IPackage } from "@/type";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { FaMinus, FaPlus, FaUser } from "react-icons/fa6";
+import FromCollapsible from "./FromCollapsed";
 import UserInfoForm from "./UserInfoForm";
-import { useAddBookingMutation } from "@/redux/features/booking/bookingApiSlice";
-import { ImSpinner3 } from "react-icons/im";
 
 export default function Calendars({ packages }: { packages: IPackage }) {
   const [adultCount, setAdultCount] = useState(0);
   const [childCount, setChildCount] = useState(0);
   const [infantCount, setInfantCount] = useState(0);
-  const [subTotal, setSubTotal] = useState(0);
-  const [processingFee, setProcessingFee] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [child_guest_id, setChildGuestId] = useState("");
   const [adult_guest_id, setAdultGuestId] = useState("");
   const child = useSearchParams().get("sub_package");
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-  const [formErrors, setFormErrors] = useState({} as any);
   const [location_id, setLocationId] = useState({
     start_point_id: "",
     end_point_id: "",
@@ -76,59 +68,27 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const childPrice = childCount ? childData?.data?.price : 0;
   const adultPrice = adultCount ? adultData?.data?.price : 0;
   const [addBooking] = useAddBookingMutation();
-
-  const handleValidityCheck = () => {
-    let errors = {};
-    if (!start?.length) errors = {...errors, start: 'Required Field'}
-    if (!end?.length) errors = {...errors, end: 'Required Field'}
-    if (!userInfo?.name) errors = {...errors, name: 'Required Field'}
-    if (!userInfo?.phone) errors = {...errors, phone: 'Required Field'}
-    if (!userInfo?.email) errors = {...errors, email: 'Required Field'}
-    if (totalAmount == 0) errors = {...errors, totalAmount: 'Total amount must be more than $0'}
-
-    setFormErrors(errors);
-    return errors;
-  }
-
   const handleBooking = async () => {
-    const errors = handleValidityCheck();
-    if (Object.keys(errors).length !== 0) {
-      return;
-    }
-
-    setIsPaymentLoading(true);
-    try {
-      const booking = {
-        adult_guest: adultCount,
-        child_guest: childCount,
-        infant_guest: infantCount,
-        package_id: packages.id,
-        sub_package_id: getSubPackages?.id,
-        start_point: start,
-        end_point: end,
-        date: new Date(selectedDate).toISOString().split("T")[0],
-        totalAmount,
-        user: userInfo,
-      };
-      const bookings = (await addBooking(booking)) as any;
-      push(bookings.data.url);
-      setUserInfo({});
-      setIsPaymentLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsPaymentLoading(false);
-    }
-    setIsPaymentLoading(false);
+    const booking = {
+      adult_guest: adultCount,
+      child_guest: childCount,
+      infant_guest: infantCount,
+      package_id: packages.id,
+      start_point: start,
+      end_point: end,
+      date: new Date(selectedDate).toISOString().split("T")[0],
+      totalAmount:
+        childPrice || adultPrice
+          ? childCount * childPrice +
+            adultCount * adultPrice +
+            ((childCount * childPrice + adultCount * adultPrice) * 5) / 100
+          : 0,
+      user: userInfo,
+    };
+    const bookings = (await addBooking(booking)) as any;
+    push(bookings.data.url);
+    console.log(booking.totalAmount);
   };
-
-  useEffect(() => {
-    const _subTotal =
-      childCount * (childPrice ?? 0) + adultCount * (adultPrice ?? 0);
-    const _processingFee = _subTotal * 0.0384;
-    setSubTotal(_subTotal);
-    setProcessingFee(_processingFee);
-    setTotalAmount(_subTotal + _processingFee);
-  }, [adultCount, childCount, adultPrice, childPrice]);
 
   return (
     <div className="row justify-center">
@@ -149,8 +109,6 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               start={start}
               setLocationId={setLocationId}
               locationId={location_id}
-              formErrors={formErrors}
-              setFormErrors={setFormErrors}
             />
 
             <ToCollapsible
@@ -161,14 +119,15 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               end={end}
               setLocationId={setLocationId}
               locationId={location_id}
-              formErrors={formErrors}
-              setFormErrors={setFormErrors}
             />
           </div>
 
           {/* Calender Container */}
           <div className="space-y-3 text-left">
-            <h3 className="px-2 font-bold text-gray-700">Select Date</h3>
+            <h3 className="px-2 font-bold text-gray-700">
+              Select Date
+              <br /> (Booking Starts from 1st June, 2024 - 14th October, 2024)
+            </h3>
             <Calendar
               onChange={handleDateChange as any}
               value={selectedDate}
@@ -225,8 +184,8 @@ export default function Calendars({ packages }: { packages: IPackage }) {
                     //   ? (setChildGuestId(item.id) as any)
                     //   : (setAdultGuestId(item.id) as any)) &
                     item.name === "Child"
-                      ? setChildCount(Math.max(childCount - 1, 0))
-                      : (setAdultCount(Math.max(adultCount - 1, 0)) as any)
+                      ? setChildCount(childCount - 1)
+                      : (setAdultCount(adultCount - 1) as any)
                   }
                 >
                   <FaMinus />
@@ -254,46 +213,54 @@ export default function Calendars({ packages }: { packages: IPackage }) {
           ))}
 
           {/* Infant */}
-          <div className="flex items-center mt-4 space-x-2">
-            <input
-              type="checkbox"
-              id="infant"
-              onChange={() => setIsInfant(!isInfant)}
-            />
-            <label
-              htmlFor="infant"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Infant available?
-            </label>
-          </div>
-          {/* Infant */}
-          {isInfant && (
-            <div className="space-y-2">
-              <h3 className="text-left px-2 font-bold text-gray-700">Infant</h3>
-              <div className="flex justify-center px-5 py-2 text-gray-500 shadow-md rounded-2xl border-[1px]">
-                <button
-                  className="bg-gray-200 w-6 h-6 grid place-content-center rounded-md"
-                  onClick={() => setInfantCount(infantCount - 1)}
-                  disabled={infantCount === 0}
+
+          <div className="row mt-4">
+            <div className="col-12 mb-4">
+              <div className="flex items-center mt-4  space-x-2">
+                <input
+                  type="checkbox"
+                  id="infant"
+                  onChange={() => setIsInfant(!isInfant)}
+                />
+                <label
+                  htmlFor="infant"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  <FaMinus />
-                </button>
-                <div className="w-2/3 font-medium flex items-center justify-center">
-                  <FaUser className="text-xs mr-1" /> {infantCount}{" "}
-                </div>
-                <button
-                  className="bg-gray-200 w-6 h-6 grid place-content-center rounded-md"
-                  onClick={() => setInfantCount(infantCount + 1)}
-                >
-                  <FaPlus />
-                </button>
+                  Have Infant(s)?
+                </label>
               </div>
             </div>
-          )}
+
+            {/* Infant */}
+            {isInfant && (
+              <div className="space-y-2">
+                <h3 className="text-left px-2 font-bold text-gray-700">
+                  Infant
+                </h3>
+                <div className="flex justify-center px-5 py-2 text-gray-500 shadow-md rounded-2xl border-[1px]">
+                  <button
+                    className="bg-gray-200 w-6 h-6 grid place-content-center rounded-md"
+                    onClick={() => setInfantCount(infantCount - 1)}
+                    disabled={infantCount === 0}
+                  >
+                    <FaMinus />
+                  </button>
+                  <div className="w-2/3 font-medium flex items-center justify-center">
+                    <FaUser className="text-xs mr-1" /> {infantCount}{" "}
+                  </div>
+                  <button
+                    className="bg-gray-200 w-6 h-6 grid place-content-center rounded-md"
+                    onClick={() => setInfantCount(infantCount + 1)}
+                  >
+                    <FaPlus />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {/* user information */}
-        <UserInfoForm setUserInfo={setUserInfo} userInfo={userInfo} formErrors={formErrors} setFormErrors={setFormErrors} />
+        <UserInfoForm setUserInfo={setUserInfo} userInfo={userInfo} />
         {/* Payment Detail */}
         <div>
           <div className="flex flex-col">
@@ -302,7 +269,9 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               <p className="text-lg">Subtotal -</p>
               <p className="text-xl font-medium">
                 <span className="text-sm">$</span>
-                {subTotal.toFixed(3)}
+                {(childCount * childPrice ? childCount * childPrice : 0) +
+                  (adultCount * adultPrice ? adultCount * adultPrice : 0)}
+                {}
               </p>
             </div>
 
@@ -310,7 +279,11 @@ export default function Calendars({ packages }: { packages: IPackage }) {
             <div className="flex justify-end items-end gap-10 py-3 w-full border-b-[2px]">
               <p className="text-lg">Processing Fee -</p>
               <p className="font-medium">
-                <span className="text-sm">$</span> {processingFee.toFixed(3)}
+                <span className="text-sm">$</span>{" "}
+                {childPrice || adultPrice
+                  ? ((childCount * childPrice + adultCount * adultPrice) * 5) /
+                    100
+                  : 0}
               </p>
             </div>
 
@@ -319,15 +292,19 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               <p className="text-lg">Total -</p>
               <p className="text-5xl font-bold text-cyan-500">
                 <span className="text-3xl font-medium">$</span>
-                {totalAmount.toFixed(3)}
+                {childPrice || adultPrice
+                  ? childCount * childPrice +
+                    adultCount * adultPrice +
+                    ((childCount * childPrice + adultCount * adultPrice) * 5) /
+                      100
+                  : 0}
               </p>
             </div>
 
             {/* Pay Now button */}
             <div className="flex justify-end items-end gap-10 py-3 w-full">
               <div className="bg-cyan-400 flex flex-col items-center justify-center rounded-2xl text-white font-bold px-10  py-3">
-                <button className="text-2xl flex gap-2 items-center" onClick={handleBooking}>
-                  {isPaymentLoading ? <ImSpinner3 size={24} /> : null}
+                <button className="text-2xl" onClick={handleBooking}>
                   Pay Now
                 </button>
               </div>

@@ -1,11 +1,13 @@
 "use client";
 import { IPackage } from "@/type";
 import Image from "next/image";
-import RoadMap from "../../public/images/road-map.jpeg";
+import { useSearchParams } from "next/navigation";
 
-function BannerSection({ packages }: { packages: IPackage }) {
+function BannerSection({ packages, packageData }: { packages: IPackage }) {
+  const searchParams = useSearchParams();
+  const search = searchParams.get("sub_package");
   const filterPackages = packages?.child_packages?.find(
-    (item: any) => item.name === "Morning"
+    (item: any) => item.name === search
   );
 
   return (
@@ -18,14 +20,34 @@ function BannerSection({ packages }: { packages: IPackage }) {
               {filterPackages ? filterPackages.name : ""} {packages?.name}
             </span>{" "}
           </h1>
-          <p className="mt-8 text-gray-700">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolores
-            repellat perspiciatis aspernatur quis voluptatum porro incidunt,
-            libero sequi quos eos velit
+          <p className="mt-8 text-gray-700 text-center">
+            {packages.description}
           </p>
         </div>
         <div className="relative w-full h-auto overflow-hidden rounded-lg">
-          <Image src={RoadMap} alt="Hero image" width={1280} height={500} />
+          {search ? (
+            <>
+              <Image
+                src={
+                  search === "Morning Shuttle"
+                    ? packageData?.morning_cover_photo
+                    : packageData?.afternoon_cover_photo
+                }
+                alt="Hero image"
+                width={1280}
+                height={500}
+              />
+            </>
+          ) : (
+            <>
+              <Image
+                src={packageData?.cover_photo}
+                alt="Hero image"
+                width={1280}
+                height={500}
+              />
+            </>
+          )}
         </div>
       </div>
     </section>
