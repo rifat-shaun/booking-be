@@ -20,7 +20,6 @@ const UserInfoForm = ({
     setFormErrors({ ...formErrors, [key]: ''})
   }
 
-  console.log("Here you go ===>", formErrors?.name,  !!formErrors?.name);
   return (
     <div className="mb-10">
       <h3 className="text-left text-2xl text-gray-700 border-b-2 px-2 py-3">
