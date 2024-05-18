@@ -37,6 +37,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const child = useSearchParams().get("sub_package");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({} as any);
   const [location_id, setLocationId] = useState({
     start_point_id: "",
     end_point_id: "",
@@ -76,24 +77,41 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const adultPrice = adultCount ? adultData?.data?.price : 0;
   const [addBooking] = useAddBookingMutation();
 
+  const handleValidityCheck = () => {
+    let errors = {};
+    if (!start?.length) errors = {...errors, start: 'Required Field'}
+    if (!end?.length) errors = {...errors, end: 'Required Field'}
+    if (!userInfo?.name) errors = {...errors, name: 'Required Field'}
+    if (!userInfo?.phone) errors = {...errors, phone: 'Required Field'}
+    if (!userInfo?.email) errors = {...errors, email: 'Required Field'}
+    if (totalAmount == 0) errors = {...errors, totalAmount: 'Total amount must be more than $0'}
+
+    setFormErrors(errors);
+    return errors;
+  }
+
   const handleBooking = async () => {
-    const booking = {
-      adult_guest: adultCount,
-      child_guest: childCount,
-      infant_guest: infantCount,
-      package_id: packages.id,
-      start_point: start,
-      end_point: end,
-      date: new Date(selectedDate).toISOString().split("T")[0],
-      totalAmount:
-        ((adultCount * adultPrice + childCount * childPrice) * 5) / 100,
-      user: userInfo,
-    };
+    const errors = handleValidityCheck();
+    if (Object.keys(errors).length !== 0) {
+      return;
+    }
+
     setIsPaymentLoading(true);
     try {
+      const booking = {
+        adult_guest: adultCount,
+        child_guest: childCount,
+        infant_guest: infantCount,
+        package_id: packages.id,
+        start_point: start,
+        end_point: end,
+        date: new Date(selectedDate).toISOString().split("T")[0],
+        totalAmount,
+        user: userInfo,
+      };
       const bookings = (await addBooking(booking)) as any;
-      setUserInfo({});
       push(bookings.data.url);
+      setUserInfo({});
       setIsPaymentLoading(false);
     } catch (error) {
       console.log(error);
@@ -130,6 +148,8 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               start={start}
               setLocationId={setLocationId}
               locationId={location_id}
+              formErrors={formErrors}
+              setFormErrors={setFormErrors}
             />
 
             <ToCollapsible
@@ -140,12 +160,14 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               end={end}
               setLocationId={setLocationId}
               locationId={location_id}
+              formErrors={formErrors}
+              setFormErrors={setFormErrors}
             />
           </div>
 
           {/* Calender Container */}
           <div className="space-y-3 text-left">
-            <h3 className="px-2 font-bold text-gray-700">Select Date</h3>
+            <h3 className="px-2 font-bold text-gray-700">Select Date<span className="text-red-500">*</span></h3>
             <Calendar
               onChange={handleDateChange as any}
               value={selectedDate}
@@ -270,7 +292,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
           )}
         </div>
         {/* user information */}
-        <UserInfoForm setUserInfo={setUserInfo} userInfo={userInfo} />
+        <UserInfoForm setUserInfo={setUserInfo} userInfo={userInfo} formErrors={formErrors} setFormErrors={setFormErrors} />
         {/* Payment Detail */}
         <div>
           <div className="flex flex-col">

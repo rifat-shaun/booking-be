@@ -6,11 +6,21 @@ import InputField from "./InputField";
 const UserInfoForm = ({
   userInfo,
   setUserInfo,
+  formErrors,
+  setFormErrors
 }: {
   userInfo: any;
   setUserInfo: any;
+  formErrors: any;
+  setFormErrors: (value: any) => void;
 }) => {
   const [isAccount, setIsAccount] = useState(false);
+  const handleInputValueChange = (key: string, value: any) => {
+    setUserInfo({ ...userInfo, [key]: value })
+    setFormErrors({ ...formErrors, [key]: ''})
+  }
+
+  console.log("Here you go ===>", formErrors?.name,  !!formErrors?.name);
   return (
     <div className="mb-10">
       <h3 className="text-left text-2xl text-gray-700 border-b-2 px-2 py-3">
@@ -26,8 +36,9 @@ const UserInfoForm = ({
               placeholder="Enter your name"
               required
               onChange={(e: any) =>
-                setUserInfo({ ...userInfo, name: e.target.value })
+                handleInputValueChange('name', e.target.value)
               }
+              error={!!formErrors?.name ? formErrors?.name : null}
             />
           </div>
           <div className="col-12 md:col-6 mb-4">
@@ -37,8 +48,9 @@ const UserInfoForm = ({
               placeholder="Enter your email"
               required
               onChange={(e: any) =>
-                setUserInfo({ ...userInfo, email: e.target.value })
+                handleInputValueChange('email', e.target.value)
               }
+              error={!!formErrors?.email ? formErrors?.email : null}
             />
           </div>
         </div>
@@ -50,8 +62,9 @@ const UserInfoForm = ({
               placeholder="Enter your Phone"
               required
               onChange={(e: any) =>
-                setUserInfo({ ...userInfo, phone: e.target.value })
+                handleInputValueChange('phone', e.target.value)
               }
+              error={!!formErrors?.phone ? formErrors?.phone : null}
             />
           </div>
           <div className="col-12 md:col-6 mb-4">
@@ -63,7 +76,7 @@ const UserInfoForm = ({
               type="text"
               placeholder="Address"
               onChange={(e: any) =>
-                setUserInfo({ ...userInfo, address: e.target.value })
+                handleInputValueChange('address', e.target.value)
               }
             />
           </div>
@@ -77,7 +90,7 @@ const UserInfoForm = ({
                 placeholder="Password"
                 required
                 onChange={(e: any) =>
-                  setUserInfo({ ...userInfo, password: e.target.value })
+                handleInputValueChange('password', e.target.value)
                 }
               />
             </div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCollapse } from "react-collapsed";
 import InputField from "./InputField";
 import LabelField from "./LabelField";
@@ -95,6 +95,8 @@ const FromCollapsible = ({
   start,
   setLocationId,
   locationId,
+  formErrors,
+  setFormErrors,
 }: {
   label: string;
   locations: any;
@@ -105,9 +107,15 @@ const FromCollapsible = ({
     start_point_id: string;
     end_point_id: string;
   };
+  formErrors: any;
+  setFormErrors: (value: any) => any;
 }) => {
   const { getCollapseProps, getToggleProps, isExpanded, setExpanded } =
     useCollapse();
+
+  useEffect(() => {
+    setFormErrors?.({ ...formErrors, start: "" });
+  }, [start]);
   return (
     <div className="text-left">
       <div className="px-2">
@@ -115,7 +123,11 @@ const FromCollapsible = ({
       </div>
       <div className="relative">
         <div {...getToggleProps()}>
-          <InputField type="text" value={start} />
+          <InputField
+            type="text"
+            value={start}
+            error={!!formErrors?.start ? formErrors?.start : null}
+          />
         </div>
         <button
           className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2  right-0 text-lg"
