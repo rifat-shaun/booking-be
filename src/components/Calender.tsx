@@ -21,6 +21,7 @@ import { useGetGuestQuery } from "@/redux/features/guest/guestApiSlice";
 import { useGetUserDetailsQuery } from "@/redux/authApiSlice";
 import UserInfoForm from "./UserInfoForm";
 import { useAddBookingMutation } from "@/redux/features/booking/bookingApiSlice";
+import { ImSpinner3 } from "react-icons/im";
 
 export default function Calendars({ packages }: { packages: IPackage }) {
   const [adultCount, setAdultCount] = useState(0);
@@ -35,6 +36,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const [adult_guest_id, setAdultGuestId] = useState("");
   const child = useSearchParams().get("sub_package");
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [location_id, setLocationId] = useState({
     start_point_id: "",
     end_point_id: "",
@@ -87,17 +89,26 @@ export default function Calendars({ packages }: { packages: IPackage }) {
         ((adultCount * adultPrice + childCount * childPrice) * 5) / 100,
       user: userInfo,
     };
-    const bookings = (await addBooking(booking)) as any;
-    setUserInfo({});
-    push(bookings.data.url);
+    setIsPaymentLoading(true);
+    try {
+      const bookings = (await addBooking(booking)) as any;
+      setUserInfo({});
+      push(bookings.data.url);
+      setIsPaymentLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsPaymentLoading(false);
+    }
+    setIsPaymentLoading(false);
   };
 
   useEffect(() => {
-      const _subTotal = childCount * (childPrice ?? 0) + adultCount * (adultPrice ?? 0);
-      const _processingFee = _subTotal * 0.0384;
-      setSubTotal(_subTotal);
-      setProcessingFee(_processingFee);
-      setTotalAmount(_subTotal + _processingFee);
+    const _subTotal =
+      childCount * (childPrice ?? 0) + adultCount * (adultPrice ?? 0);
+    const _processingFee = _subTotal * 0.0384;
+    setSubTotal(_subTotal);
+    setProcessingFee(_processingFee);
+    setTotalAmount(_subTotal + _processingFee);
   }, [adultCount, childCount, adultPrice, childPrice]);
 
   return (
@@ -276,8 +287,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
             <div className="flex justify-end items-end gap-10 py-3 w-full border-b-[2px]">
               <p className="text-lg">Processing Fee -</p>
               <p className="font-medium">
-                <span className="text-sm">$</span>{" "}
-                {processingFee.toFixed(3)}
+                <span className="text-sm">$</span> {processingFee.toFixed(3)}
               </p>
             </div>
 
@@ -293,7 +303,8 @@ export default function Calendars({ packages }: { packages: IPackage }) {
             {/* Pay Now button */}
             <div className="flex justify-end items-end gap-10 py-3 w-full">
               <div className="bg-cyan-400 flex flex-col items-center justify-center rounded-2xl text-white font-bold px-10  py-3">
-                <button className="text-2xl" onClick={handleBooking}>
+                <button className="text-2xl flex gap-2 items-center" onClick={handleBooking}>
+                  {isPaymentLoading ? <ImSpinner3 size={24} /> : null}
                   Pay Now
                 </button>
               </div>
