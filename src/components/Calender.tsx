@@ -5,7 +5,7 @@ import {
   useGetStartLocationQuery,
 } from "@/redux/features/location/locationApiSlice";
 import { IPackage } from "@/type";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ToCollapsible from "@/components/ToCollapsed";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -26,6 +26,9 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const [adultCount, setAdultCount] = useState(0);
   const [childCount, setChildCount] = useState(0);
   const [infantCount, setInfantCount] = useState(0);
+  const [subTotal, setSubTotal] = useState(0);
+  const [processingFee, setProcessingFee] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [child_guest_id, setChildGuestId] = useState("");
@@ -70,6 +73,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
   const childPrice = childCount ? childData?.data?.price : 0;
   const adultPrice = adultCount ? adultData?.data?.price : 0;
   const [addBooking] = useAddBookingMutation();
+
   const handleBooking = async () => {
     const booking = {
       adult_guest: adultCount,
@@ -84,8 +88,17 @@ export default function Calendars({ packages }: { packages: IPackage }) {
       user: userInfo,
     };
     const bookings = (await addBooking(booking)) as any;
+    setUserInfo({});
     push(bookings.data.url);
   };
+
+  useEffect(() => {
+      const _subTotal = childCount * (childPrice ?? 0) + adultCount * (adultPrice ?? 0);
+      const _processingFee = _subTotal * 0.0384;
+      setSubTotal(_subTotal);
+      setProcessingFee(_processingFee);
+      setTotalAmount(_subTotal + _processingFee);
+  }, [adultCount, childCount, adultPrice, childPrice]);
 
   return (
     <div className="row justify-center">
@@ -178,8 +191,8 @@ export default function Calendars({ packages }: { packages: IPackage }) {
                     //   ? (setChildGuestId(item.id) as any)
                     //   : (setAdultGuestId(item.id) as any)) &
                     item.name === "Child"
-                      ? setChildCount(childCount - 1)
-                      : (setAdultCount(adultCount - 1) as any)
+                      ? setChildCount(Math.max(childCount - 1, 0))
+                      : (setAdultCount(Math.max(adultCount - 1, 0)) as any)
                   }
                 >
                   <FaMinus />
@@ -255,9 +268,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               <p className="text-lg">Subtotal -</p>
               <p className="text-xl font-medium">
                 <span className="text-sm">$</span>
-                {(childCount * childPrice ? childCount * childPrice : 0) +
-                  (adultCount * adultPrice ? adultCount * adultPrice : 0)}
-                {}
+                {subTotal.toFixed(3)}
               </p>
             </div>
 
@@ -266,10 +277,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               <p className="text-lg">Processing Fee -</p>
               <p className="font-medium">
                 <span className="text-sm">$</span>{" "}
-                {childPrice || adultPrice
-                  ? ((childCount * childPrice + adultCount * adultPrice) * 5) /
-                    100
-                  : 0}
+                {processingFee.toFixed(3)}
               </p>
             </div>
 
@@ -278,12 +286,7 @@ export default function Calendars({ packages }: { packages: IPackage }) {
               <p className="text-lg">Total -</p>
               <p className="text-5xl font-bold text-cyan-500">
                 <span className="text-3xl font-medium">$</span>
-                {childPrice || adultPrice
-                  ? childCount * childPrice +
-                    adultCount * adultPrice +
-                    ((childCount * childPrice + adultCount * adultPrice) * 5) /
-                      100
-                  : 0}
+                {totalAmount.toFixed(3)}
               </p>
             </div>
 
